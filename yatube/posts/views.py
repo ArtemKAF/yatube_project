@@ -4,10 +4,20 @@ from django.http import HttpResponse
 # Create your views here.
 
 def index(request):
-    return HttpResponse('Main page')
+    template = 'posts/index.html'
+    text = 'This is main page'
+    context ={
+        'text': text,
+    }
+    return render(request, template, context)
 
 def group_posts(request):
-    return HttpResponse('Posts group')
+    template = 'posts/group_list.html'
+    text = 'Here will be information about the Yatube project groups'
+    context = {
+        'text': text,
+    }
+    return render(request, template, context)
 
 def post_detail(request, slug):
     return HttpResponse(f'Post about {slug}')
