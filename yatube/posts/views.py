@@ -1,13 +1,14 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from .models import Post
 
 # Create your views here.
 
 def index(request):
     template = 'posts/index.html'
-    text = 'This is main page'
+    posts = Post.objects.order_by('-pub_date')[:10]
     context ={
-        'text': text,
+        'posts': posts,
     }
     return render(request, template, context)
 
