@@ -5,8 +5,8 @@ User = get_user_model()
 
 # Create your models here.
 class Group(models.Model):
-    title = models.TextField()
-    slug = models.TextField()
+    title = models.CharField(max_length=50)
+    slug = models.SlugField()
     description = models.TextField()
 
     def __str__(self):
