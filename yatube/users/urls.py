@@ -18,7 +18,7 @@ urlpatterns = [
             template_name="users/logged_out.html"
         ),
         name="logout"
-        ),
+    ),
     path(
         "signup/",
         views.SignUp.as_view(

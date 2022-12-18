@@ -21,10 +21,11 @@ def index(request):
     }
     return render(request, template, context)
 
+
 @login_required
 def post_create(request):
     template = "posts/post_create.html"
-    title="Добавить запись"
+    title = "Добавить запись"
     if request.method == "POST":
         form = PostForm(request.POST)
         if form.is_valid():
@@ -32,7 +33,7 @@ def post_create(request):
             post.author = request.user
             post.save()
             return redirect("posts:profile", request.user)
-        context={
+        context = {
             "form": form,
             "is_edit": False,
             "title": title,
@@ -40,12 +41,13 @@ def post_create(request):
         return render(request, template, context)
     else:
         form = PostForm()
-        context={   
+        context = {   
             "form": form,
             "is_edit": False,
             "title": title,
         }
         return render(request, template, context)
+
 
 @login_required
 def post_edit(request, post_id):
@@ -60,7 +62,7 @@ def post_edit(request, post_id):
                 post.group = form.cleaned_data["group"]
                 post.save()
                 return redirect("posts:post_details", post.id)
-            context={
+            context = {
                 "form": form,
                 "is_edit": True,
                 "title": title,
@@ -68,13 +70,14 @@ def post_edit(request, post_id):
             return render(request, template, context)
         else:
             form = PostForm(instance=post)
-            context={
+            context = {
                 "form": form,
                 "is_edit": True,
                 "title": title,
             }
             return render(request, template, context)
     return redirect("posts:profile", post.author)
+
 
 def group_posts(request, slug):
     template = "posts/group_list.html"
@@ -89,6 +92,7 @@ def group_posts(request, slug):
     }
     return render(request, template, context)
 
+
 def profile(request, username):
     template="posts/profile.html"
     author = get_object_or_404(User, username=username)
@@ -101,13 +105,14 @@ def profile(request, username):
         author_full_name = author.get_full_name()
     else:
         author_full_name = author.get_username()
-    context={
+    context = {
         "page_obj": page_obj,
         "author": author,  # Только ради тестов в pytest
         "author_full_name": author_full_name,
         "count_posts": count_posts,
     }
     return render(request, template, context)
+
 
 def post_detail(request, post_id):
     template="posts/post_detail.html"
@@ -117,7 +122,7 @@ def post_detail(request, post_id):
         author_full_name = post.author.get_full_name()
     else:
         author_full_name = post.author.get_username()
-    context={
+    context = {
         "post": post,
         "count_posts": count_posts,
         "author_full_name": author_full_name,
