@@ -41,7 +41,7 @@ def post_create(request):
         return render(request, template, context)
     else:
         form = PostForm()
-        context = {   
+        context = {
             "form": form,
             "is_edit": False,
             "title": title,
@@ -54,7 +54,7 @@ def post_edit(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     if request.user == post.author:
         template = "posts/post_create.html"
-        title="Редактировать запись"
+        title = "Редактировать запись"
         if request.method == "POST":
             form = PostForm(request.POST)
             if form.is_valid():
@@ -94,7 +94,7 @@ def group_posts(request, slug):
 
 
 def profile(request, username):
-    template="posts/profile.html"
+    template = "posts/profile.html"
     author = get_object_or_404(User, username=username)
     posts = Post.objects.filter(author=author)
     paginator = Paginator(posts, POST_PER_PAGE)
@@ -115,7 +115,7 @@ def profile(request, username):
 
 
 def post_detail(request, post_id):
-    template="posts/post_detail.html"
+    template = "posts/post_detail.html"
     post = get_object_or_404(Post, pk=post_id)
     count_posts = Post.objects.filter(author=post.author).count()
     if post.author.get_full_name():
