@@ -21,6 +21,11 @@ class Group(models.Model):
     def __str__(self):
         return self.title
 
+    class Meta:
+        ordering = ("title",)
+        verbose_name = "Группа"
+        verbose_name_plural = "Группы"
+
 
 class Post(models.Model):
     text = models.TextField(
