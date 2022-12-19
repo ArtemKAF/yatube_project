@@ -49,32 +49,31 @@ def post_create(request):
 
 @login_required
 def post_edit(request, post_id):
+    template = "posts/post_create.html"
+    title = "Редактировать запись"
+    is_edit = True
     post = get_object_or_404(Post, pk=post_id)
-    if request.user == post.author:
-        template = "posts/post_create.html"
-        title = "Редактировать запись"
-        if request.method == "POST":
-            form = PostForm(request.POST)
-            if form.is_valid():
-                post.text = form.cleaned_data["text"]
-                post.group = form.cleaned_data["group"]
-                post.save()
-                return redirect("posts:post_details", post.id)
-            context = {
-                "form": form,
-                "is_edit": True,
-                "title": title,
-            }
-            return render(request, template, context)
-        else:
-            form = PostForm(instance=post)
-            context = {
-                "form": form,
-                "is_edit": True,
-                "title": title,
-            }
-            return render(request, template, context)
-    return redirect("posts:profile", post.author)
+    if request.user != post.author:
+        return redirect("posts:profile", post.author)
+    if request.method == "GET":
+        context = {
+            "form": PostForm(instance=post),
+            "is_edit": is_edit,
+            "title": title,
+        }
+        return render(request, template, context)
+    form = PostForm(request.POST)
+    if form.is_valid():
+        post.text = form.cleaned_data["text"]
+        post.group = form.cleaned_data["group"]
+        post.save()
+        return redirect("posts:post_details", post.id)
+    context = {
+        "form": form,
+        "is_edit": is_edit,
+        "title": title,
+    }
+    return render(request, template, context)
 
 
 def group_posts(request, slug):
