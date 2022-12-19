@@ -1,3 +1,4 @@
+from constants import POST_PER_PAGE
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
@@ -6,7 +7,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 from .forms import PostForm
 from .models import Group, Post
 
-POST_PER_PAGE = 10
 User = get_user_model()
 
 
