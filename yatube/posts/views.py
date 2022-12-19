@@ -25,27 +25,26 @@ def index(request):
 def post_create(request):
     template = "posts/post_create.html"
     title = "Добавить запись"
-    if request.method == "POST":
-        form = PostForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.save()
-            return redirect("posts:profile", request.user)
+    is_edit = False
+    if request.method == "GET":
         context = {
-            "form": form,
-            "is_edit": False,
+            "form": PostForm(),
+            "is_edit": is_edit,
             "title": title,
         }
         return render(request, template, context)
-    else:
-        form = PostForm()
-        context = {
-            "form": form,
-            "is_edit": False,
-            "title": title,
-        }
-        return render(request, template, context)
+    form = PostForm(request.POST)
+    if form.is_valid():
+        post = form.save(commit=False)
+        post.author = request.user
+        post.save()
+        return redirect("posts:profile", request.user)
+    context = {
+        "form": form,
+        "is_edit": is_edit,
+        "title": title,
+    }
+    return render(request, template, context)
 
 
 @login_required
