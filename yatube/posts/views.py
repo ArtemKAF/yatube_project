@@ -1,25 +1,24 @@
-from constants import POST_PER_PAGE
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 
+from .constants import POST_PER_PAGE
 from .forms import PostForm
 from .models import Group, Post
+from .utils import create_pagination
 
 User = get_user_model()
 
 
 def index(request):
-    template = "posts/index.html"
-    posts = Post.objects.all()
-    paginator = Paginator(posts, POST_PER_PAGE)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
     context = {
-        "page_obj": page_obj,
+        "page_obj": create_pagination(
+            Post.objects.all(),
+            POST_PER_PAGE,
+            request.GET.get("page")
+        ),
     }
-    return render(request, template, context)
+    return render(request, "posts/index.html", context)
 
 
 @login_required
@@ -80,38 +79,35 @@ def post_edit(request, post_id):
 
 
 def group_posts(request, slug):
-    template = "posts/group_list.html"
     group = get_object_or_404(Group, slug=slug)
-    posts = group.groups.all()
-    paginator = Paginator(posts, POST_PER_PAGE)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
     context = {
         "group": group,
-        "page_obj": page_obj,
+        "page_obj": create_pagination(
+            group.groups.all(),
+            POST_PER_PAGE,
+            request.GET.get("page")
+        ),
     }
-    return render(request, template, context)
+    return render(request, "posts/group_list.html", context)
 
 
 def profile(request, username):
-    template = "posts/profile.html"
     author = get_object_or_404(User, username=username)
-    posts = Post.objects.filter(author=author)
-    paginator = Paginator(posts, POST_PER_PAGE)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-    count_posts = paginator.count
     if author.get_full_name():
         author_full_name = author.get_full_name()
     else:
         author_full_name = author.get_username()
     context = {
-        "page_obj": page_obj,
+        "page_obj": create_pagination(
+            Post.objects.filter(author=author),
+            POST_PER_PAGE,
+            request.GET.get("page")
+        ),
         "author": author,  # Только ради тестов в pytest
         "author_full_name": author_full_name,
-        "count_posts": count_posts,
+        "count_posts": Post.objects.filter(author=author).count(),
     }
-    return render(request, template, context)
+    return render(request, "posts/profile.html", context)
 
 
 def post_detail(request, post_id):
