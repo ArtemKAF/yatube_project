@@ -1,8 +1,23 @@
 {% load static %}
 {% with request.resolver_match.view_name as view_name%}
 <header>
-    <nav class="navbar navbar-light" style="background-color: lightskyblue">
+    <nav
+      class="navbar navbar-light navbar-expand-md sticky-top"
+      style="background-color: lightskyblue"
+    >
       <div class="container">
+        <a class="navbar-brand">
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarContent"
+            aria-controls="navbarContent"
+            aria-expanded="false"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+        </a>
         <a class="navbar-brand" href={% url 'posts:index' %}>
           <img
             src={% static 'img/logo.png' %}
@@ -13,93 +28,95 @@
           >
           <span style="color:red">Ya</span>tube
         </a>
-        <ul class="nav nav-pills">
-          <li class="nav-item"> 
-            <a
-              class="nav-link
-                {% if view_name  == 'about:author' %}
-                  active
-                {% endif %}"
-              href={% url "about:author" %}
-            >
-              Об авторе
-            </a>
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link
-              {% if view_name  == 'about:tech' %}
-                active
-              {% endif %}"
-              href={% url "about:tech" %}
-            >
-              Технологии
-            </a>
-          </li>
-          {% if request.user.is_authenticated %}
-          <li class="nav-item"> 
-            <a
-              class="nav-link
-              {% if view_name  == 'posts:post_create' %}
-                active
-              {% endif %}"
-              href={% url "posts:post_create" %}
-            >
-              Новая запись
-            </a>
-          </li>
-          <li class="nav-item"> 
-            <a
-              class="nav-link link-light"
-              href={% url "password_change" %}
-            >
-              Изменить пароль
-            </a>
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link link-light"
-              href={% url "users:logout" %}
-            >
-              Выйти
-            </a>
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link
-              {% if view_name  == 'posts:profile' and author_full_name == user.get_username %}
-                active
-              {% endif %}"
-              href={% url "posts:profile" user.get_username %}
-            >
-              Пользователь: {{ user.get_username }}
-          </a>
-          </li>
-          {% else %}
-          <li class="nav-item"> 
-            <a
-              class="nav-link link-light
-                {% if view_name  == 'users:login' %}
-                  active
-                {% endif %}"
-                href={% url "users:login" %}
+        <div class="collapse navbar-collapse" id="navbarContent">
+          <ul class="navbar-nav nav-pills">
+            <li class="nav-item"> 
+              <a
+                class="nav-link
+                  {% if view_name  == 'about:author' %}
+                    active
+                  {% endif %}"
+                href={% url "about:author" %}
               >
-                Войти
+                Об авторе
               </a>
-          </li>
-          <li class="nav-item"> 
-            <a
-              class="nav-link link-light
-              {% if view_name  == 'users:signup' %}
-                active
-              {% endif %}"
-              href={% url "users:signup" %}
-            >
-              Регистрация
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link
+                {% if view_name  == 'about:tech' %}
+                  active
+                {% endif %}"
+                href={% url "about:tech" %}
+              >
+                Технологии
+              </a>
+            </li>
+            {% if request.user.is_authenticated %}
+            <li class="nav-item"> 
+              <a
+                class="nav-link
+                {% if view_name  == 'posts:post_create' %}
+                  active
+                {% endif %}"
+                href={% url "posts:post_create" %}
+              >
+                Новая запись
+              </a>
+            </li>
+            <li class="nav-item"> 
+              <a
+                class="nav-link link-light"
+                href={% url "password_change" %}
+              >
+                Изменить пароль
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link link-light"
+                href={% url "users:logout" %}
+              >
+                Выйти
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link
+                {% if view_name  == 'posts:profile' and author_full_name == user.get_username %}
+                  active
+                {% endif %}"
+                href={% url "posts:profile" user.get_username %}
+              >
+                Пользователь: {{ user.get_username }}
             </a>
-          </li>
-          {% endif %}
-        </ul>
+            </li>
+            {% else %}
+            <li class="nav-item"> 
+              <a
+                class="nav-link link-light
+                  {% if view_name  == 'users:login' %}
+                    active
+                  {% endif %}"
+                  href={% url "users:login" %}
+                >
+                  Войти
+                </a>
+            </li>
+            <li class="nav-item"> 
+              <a
+                class="nav-link link-light
+                {% if view_name  == 'users:signup' %}
+                  active
+                {% endif %}"
+                href={% url "users:signup" %}
+              >
+                Регистрация
+              </a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
       </div>
     </nav>      
   </header>
