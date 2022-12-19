@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from .constants import POST_PER_PAGE
 from .forms import PostForm
 from .models import Group, Post
-from .utils import create_pagination
+from .utils import create_pagination, get_author_name
 
 User = get_user_model()
 
@@ -93,10 +93,6 @@ def group_posts(request, slug):
 
 def profile(request, username):
     author = get_object_or_404(User, username=username)
-    if author.get_full_name():
-        author_full_name = author.get_full_name()
-    else:
-        author_full_name = author.get_username()
     context = {
         "page_obj": create_pagination(
             Post.objects.filter(author=author),
@@ -104,23 +100,17 @@ def profile(request, username):
             request.GET.get("page")
         ),
         "author": author,  # Только ради тестов в pytest
-        "author_full_name": author_full_name,
+        "author_full_name": get_author_name(author),
         "count_posts": Post.objects.filter(author=author).count(),
     }
     return render(request, "posts/profile.html", context)
 
 
 def post_detail(request, post_id):
-    template = "posts/post_detail.html"
     post = get_object_or_404(Post, pk=post_id)
-    count_posts = Post.objects.filter(author=post.author).count()
-    if post.author.get_full_name():
-        author_full_name = post.author.get_full_name()
-    else:
-        author_full_name = post.author.get_username()
     context = {
         "post": post,
-        "count_posts": count_posts,
-        "author_full_name": author_full_name,
+        "count_posts": Post.objects.filter(author=post.author).count(),
+        "author_full_name": get_author_name(post.author),
     }
-    return render(request, template, context)
+    return render(request, "posts/post_detail.html", context)
