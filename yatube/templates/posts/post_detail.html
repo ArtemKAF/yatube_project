@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}
-  Пост {{ post.text|slice:":30" }}
+  Пост {{ post.text|truncatechars:30 }}
 {% endblock %}
 {% block content %}
     <div class="container py-5">

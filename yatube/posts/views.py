@@ -62,11 +62,9 @@ def post_edit(request, post_id):
             "title": title,
         }
         return render(request, template, context)
-    form = PostForm(request.POST)
+    form = PostForm(request.POST, instance=post)
     if form.is_valid():
-        post.text = form.cleaned_data["text"]
-        post.group = form.cleaned_data["group"]
-        post.save()
+        form.save()
         return redirect("posts:post_details", post.id)
     context = {
         "form": form,
@@ -93,13 +91,13 @@ def profile(request, username):
     author = get_object_or_404(User, username=username)
     context = {
         "page_obj": create_pagination(
-            Post.objects.filter(author=author),
+            author.posts.all(),
             POST_PER_PAGE,
             request.GET.get("page")
         ),
         "author": author,  # Только ради тестов в pytest
         "author_full_name": get_author_name(author),
-        "count_posts": Post.objects.filter(author=author).count(),
+        "count_posts": author.posts.all().count(),
     }
     return render(request, "posts/profile.html", context)
 
@@ -108,7 +106,7 @@ def post_detail(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     context = {
         "post": post,
-        "count_posts": Post.objects.filter(author=post.author).count(),
+        "count_posts": post.author.posts.all().count(),
         "author_full_name": get_author_name(post.author),
     }
     return render(request, "posts/post_detail.html", context)
