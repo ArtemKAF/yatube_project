@@ -4,7 +4,7 @@ import pytest
 from django.contrib.admin.sites import site
 from django.contrib.auth import get_user_model
 from django.db.models import fields
-from django.template.loader import get_template, select_template
+from django.template.loader import select_template
 
 try:
     from posts.models import Post
@@ -33,30 +33,6 @@ def search_refind(execution, user_code):
 
 
 class TestPost:
-
-    @pytest.mark.django_db(transaction=True)
-    def test_index_view(self, client, post_with_group):
-        try:
-            response = client.get('/')
-        except Exception as e:
-            assert False, f'''Главная страница работает неправильно. Ошибка: `{e}`'''
-        assert response.status_code != 404, (
-            'Главная страница не найдена, проверьте этот адрес в *urls.py*'
-        )
-        assert response.status_code != 500, (
-            'Главная страница не работает. Проверьте ее view-функцию'
-        )
-        assert response.status_code == 200, (
-            'Главная страница работает неправильно.'
-        )
-        # проверка моделей
-        response_text = response.content.decode()
-        posts = Post.objects.all()
-        for p in posts:
-            assert p.text in response_text, (
-                'Убедитесь, что на главной странице выводятся все посты '
-                'с сортировкой по убыванию даты публикации'
-            )
 
     def test_post_model(self):
         model_fields = Post._meta.fields
@@ -124,20 +100,9 @@ class TestPost:
         assert 'author' in admin_model.list_display, (
             'Добавьте `author` для отображения в списке модели административного сайта'
         )
-        assert 'group' in admin_model.list_display, (
-            'Добавьте `group` для отображения в списке модели административного сайта'
-        )
-        assert 'pk' in admin_model.list_display, (
-            'Добавьте `pk` для отображения в списке модели административного сайта'
-        )
         assert 'text' in admin_model.search_fields, (
             'Добавьте `text` для поиска модели административного сайта'
         )
-
-        assert 'group' in admin_model.list_editable, (
-            'Добавьте `group` в поля доступные для редактирования в модели административного сайта'
-        )
-
         assert 'pub_date' in admin_model.list_filter, (
             'Добавьте `pub_date` для фильтрации модели административного сайта'
         )
@@ -228,27 +193,13 @@ class TestGroupView:
         )
 
         assert re.search(
-            r'<\s*p(\s+class=".+"|\s*)>\s*' + post_with_group.text + r'\s*<\s*\/p\s*>',
-            html
-        ), 'Отредактируйте HTML-шаблон, не найден текст поста `<p>{{ текст_поста }}</p>`'
-
-        assert re.search(
-            r'(д|Д)ата публикации:\s*',
+            r'<\s*h1\s*>\s*' + group.title + r'\s*<\s*\/h1\s*>',
             html
         ), (
-            'Отредактируйте HTML-шаблон, не найдена дата публикации '
-            '`дата публикации: {{ дата_публикации|date:"d E Y" }}`'
+            'Отредактируйте HTML-шаблон, не найден заголовок группы '
+            '`{% block header %}{{ название_группы }}{% endblock %}`'
         )
-
         assert re.search(
-            r'(а|А)втор\:\s' + post_with_group.author.get_full_name(),
-            html,
-        ), (
-            'Отредактируйте HTML-шаблон, не найден автор публикации '
-            '`Автор: {{ полное_имя_автора_поста }},`'
-        )
-
-        base_template = get_template('base.html').template.source
-        assert re.search(
-            r'{\%\sload static\s\%}', base_template
-        ), 'Загрузите статику в base.html шаблоне'
+            r'<\s*p\s*>\s*' + group.description + r'\s*<\s*\/p\s*>',
+            html
+        ), 'Отредактируйте HTML-шаблон, не найдено описание группы `<p>{{ описание_группы }}</p>`'
