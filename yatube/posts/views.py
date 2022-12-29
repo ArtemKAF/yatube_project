@@ -1,13 +1,10 @@
-from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .constants import POST_PER_PAGE
 from .forms import PostForm
-from .models import Group, Post
+from .models import Group, Post, User
 from .utils import create_pagination, get_author_name
-
-User = get_user_model()
 
 
 def index(request):
@@ -74,7 +71,7 @@ def profile(request, username):
             POST_PER_PAGE,
             request.GET.get("page")
         ),
-        "author": author,  # Только ради тестов в pytest
+        "author": author,
         "author_full_name": get_author_name(author),
         "count_posts": author.posts.count(),
     }

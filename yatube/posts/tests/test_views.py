@@ -1,14 +1,11 @@
 from django import forms
-from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from ..constants import POST_PER_PAGE
-from ..models import Group, Post
+from ..models import Group, Post, User
 from ..utils import get_author_name
 from .constants import TEST_POST_COUNT
-
-User = get_user_model()
 
 
 class PostsPagesTests(TestCase):

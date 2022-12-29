@@ -7,6 +7,10 @@ User = get_user_model()
 
 
 class Group(models.Model):
+    description = models.TextField(
+        verbose_name="Описание",
+        help_text="Задайте описание для группы",
+    )
     title = models.CharField(
         max_length=200,
         verbose_name="Заголовок",
@@ -17,10 +21,6 @@ class Group(models.Model):
         db_index=True,
         verbose_name="Адрес",
         help_text="Короткий, уникальный адрес группы",
-    )
-    description = models.TextField(
-        verbose_name="Описание",
-        help_text="Задайте описание для группы",
     )
 
     def __str__(self) -> str:
@@ -33,14 +33,6 @@ class Group(models.Model):
 
 
 class Post(models.Model):
-    text = models.TextField(
-        verbose_name="Текст поста",
-        help_text="Введите текст поста",
-    )
-    pub_date = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Дата публикации",
-    )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -53,6 +45,14 @@ class Post(models.Model):
         null=True,
         verbose_name="Группа",
         help_text="Группа, к которой будет относиться пост",
+    )
+    pub_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Дата публикации",
+    )
+    text = models.TextField(
+        verbose_name="Текст поста",
+        help_text="Введите текст поста",
     )
 
     def __str__(self) -> str:

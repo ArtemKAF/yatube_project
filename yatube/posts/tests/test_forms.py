@@ -1,11 +1,10 @@
-from django.contrib.auth import get_user_model
+from http import HTTPStatus
+
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from ..forms import PostForm
-from ..models import Group, Post
-
-User = get_user_model()
+from ..models import Group, Post, User
 
 
 class PostsCreateFormTests(TestCase):
@@ -57,8 +56,8 @@ class PostsCreateFormTests(TestCase):
                         attr
                     )
 
-    def test_create_post(self):
-        """Проверяем создание поста"""
+    def test_create_post_authrized_client(self):
+        """Проверяем создание поста авторизованным пользователем"""
         responce = self.authorized_client.post(
             reverse("posts:post_create"),
             data=self.form_data,
@@ -71,6 +70,18 @@ class PostsCreateFormTests(TestCase):
                 "posts:profile",
                 kwargs={"username": self.user.username})
         )
+
+    def test_create_post_guest_client(self):
+        """Проверяем невозможность создания поста неавторизованным
+        пользователем
+        """
+        response = self.guest_client.post(
+            reverse("posts:post_create"),
+            data=self.form_data,
+            follow=True
+        )
+        self.assertEqual(Post.objects.count(), self.posts_count)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_editing_post(self):
         """Проверяем редактирование поста"""

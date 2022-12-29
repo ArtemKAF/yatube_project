@@ -1,10 +1,7 @@
-from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from ..models import Group, Post
 from ..constants import CHARS_LIMIT_POST
-
-User = get_user_model()
+from ..models import Group, Post, User
 
 
 class PostModelTest(TestCase):
