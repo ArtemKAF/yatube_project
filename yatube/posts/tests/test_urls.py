@@ -26,6 +26,17 @@ class PostsUrlsTests(TestCase):
             group=cls.group,
         )
 
+        Comment.objects.create(
+            post=cls.post,
+            author=cls.user,
+            text="Текст коментария",
+        )
+
+        Follow.objects.create(
+            user=cls.user,
+            author=cls.author
+        )
+
     def setUp(self):
         self.guest_client = Client()
         self.authorized_client = Client()
