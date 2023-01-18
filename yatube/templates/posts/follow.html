@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}
+  Последние обновления избранных авторов
+{% endblock %}
+{% block content %}
+  <div class="container py-5">
+    {% include 'includes/switcher.html' with follow=True %}
+    <h1>Последние обновления избранных авторов</h1>
+    {% for post in page_obj %}
+    {% include "includes/post.html" %}
+    {% endfor %}
+    {% include "includes/paginator.html" %}
+  </div>
+{% endblock %}
