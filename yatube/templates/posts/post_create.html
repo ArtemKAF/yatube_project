@@ -14,7 +14,7 @@
           {% include "includes/form_errors.html" %}
           <form method="post" enctype="multipart/form-data"
           {% if action_url %}
-            action="{% url action_url post.id %}"
+            action="{% url action_url %}"
           {% endif %}
           >
           {% csrf_token %}
