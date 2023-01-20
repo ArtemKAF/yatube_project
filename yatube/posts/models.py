@@ -57,7 +57,7 @@ class Post(models.Model):
     image = models.ImageField(
         verbose_name="Картинка",
         help_text="Добавьте изображение для поста",
-        upload_to='posts/',
+        upload_to="posts/",
         blank=True,
         null=True,
     )

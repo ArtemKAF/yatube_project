@@ -72,8 +72,8 @@ def group_posts(request, slug):
 def profile(request, username):
     author = get_object_or_404(User, username=username)
     following = False
-    if request.user.is_authenticated:
-        if request.user.follower.filter(author=author).exists():
+    if (request.user.is_authenticated
+        and request.user.follower.filter(author=author).exists()):
             following = True
     context = {
         "page_obj": create_pagination(
@@ -146,6 +146,6 @@ def profile_unfollow(request, username):
     user = request.user
     is_follower = user.follower.filter(author=author).exists()
     if user != author and is_follower:
-        temp = Follow.objects.filter(user=user, author=author)
-        temp.delete()
+        following_object = Follow.objects.filter(user=user, author=author)
+        following_object.delete()
     return redirect("posts:profile", username)

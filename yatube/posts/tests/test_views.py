@@ -323,6 +323,7 @@ class PostsPagesTests(TestCase):
         )
 
     def test_cache_index(self):
+        """Проверяем работу кэша на странице index"""
         post_for_deleting = Post.objects.create(
             text="Пост для проверки cache",
             author=PostsPagesTests.author,

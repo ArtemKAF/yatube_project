@@ -1,7 +1,14 @@
 <div class="card my-4">
   <h5 class="card-header">Добавить комментарий:</h5>
   <div class="card-body">
-    {% include "includes/form.html" with action_url=action_url post_id=post.id %}
+    {% include "includes/form_errors.html" %}
+    <form method="post" enctype="multipart/form-data"
+      {% if action_url %}
+        action="{% url action_url post.id %}"
+      {% endif %}
+    >
+    {% csrf_token %}
+    {% include "includes/form_fields.html" %}
       <div class="d-flex justify-content-end">
         <button type="submit" class="btn btn-primary">Отправить</button>
       </div>
