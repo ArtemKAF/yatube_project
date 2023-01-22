@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
-from .constants import CHARS_LIMIT_POST
+from .constants import CHARS_LIMIT_COMMENT, CHARS_LIMIT_POST
 
 User = get_user_model()
 
@@ -23,7 +23,7 @@ class Group(models.Model):
         help_text="Короткий, уникальный адрес группы",
     )
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.title
 
     class Meta:
@@ -54,8 +54,15 @@ class Post(models.Model):
         verbose_name="Текст поста",
         help_text="Введите текст поста",
     )
+    image = models.ImageField(
+        verbose_name="Картинка",
+        help_text="Добавьте изображение для поста",
+        upload_to='posts/',
+        blank=True,
+        null=True,
+    )
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.text[:CHARS_LIMIT_POST]
 
     class Meta:
@@ -63,3 +70,55 @@ class Post(models.Model):
         default_related_name = "posts"
         verbose_name = "Пост"
         verbose_name_plural = "Посты"
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(
+        Post,
+        verbose_name="Пост",
+        on_delete=models.CASCADE,
+    )
+    author = models.ForeignKey(
+        User,
+        verbose_name="Автор",
+        on_delete=models.CASCADE,
+    )
+    text = models.TextField(
+        verbose_name="Текст коментария",
+        help_text="Введите текст коментария"
+    )
+    created = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Дата публикации"
+    )
+
+    def __str__(self):
+        return self.text[:CHARS_LIMIT_COMMENT]
+
+    class Meta:
+        ordering = ("-created",)
+        default_related_name = "comments"
+        verbose_name = "Коментарий"
+        verbose_name_plural = "Коментарии"
+
+
+class Follow(models.Model):
+    user = models.ForeignKey(
+        User,
+        verbose_name="Подписчик",
+        on_delete=models.CASCADE,
+        related_name="follower",
+    )
+    author = models.ForeignKey(
+        User,
+        verbose_name="Автор",
+        on_delete=models.CASCADE,
+        related_name="following",
+    )
+
+    def __str__(self):
+        return f"{self.user} подписан на {self.author}"
+
+    class Meta:
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"

@@ -83,7 +83,7 @@
             <li class="nav-item">
               <a
                 class="nav-link
-                {% if view_name  == 'posts:profile' and author_full_name == user.get_username %}
+                {% if view_name  == 'posts:profile' and author.username == user.username %}
                   active
                 {% endif %}"
                 href={% url "posts:profile" user.get_username %}
