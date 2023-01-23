@@ -90,30 +90,26 @@ class PostsPagesTests(TestCase):
 
     def test_pages_correct_templates(self):
         """Проверяем работу namespace:name"""
-        for reverse_name, template in {
-            reverse("posts:index"): "posts/index.html",
-            reverse("posts:post_create"): "posts/post_create.html",
-            reverse(
-                "posts:profile",
-                kwargs={"username": PostsPagesTests.author},
-            ): "posts/profile.html",
-            reverse(
-                "posts:post_details",
-                kwargs={"post_id": PostsPagesTests.post.id},
-            ): "posts/post_detail.html",
-            reverse(
-                "posts:post_edit",
-                kwargs={"post_id": PostsPagesTests.post.id},
-            ): "posts/post_create.html",
-            reverse(
-                "posts:group_list",
-                kwargs={"slug": PostsPagesTests.group.slug},
-            ): "posts/group_list.html",
-            reverse("posts:follow_index"): "posts/follow.html",
-        }.items():
+        for url, template in (
+            (reverse("posts:index"), "posts/index.html"),
+            (reverse("posts:post_create"), "posts/post_create.html"),
+            (reverse(
+                "posts:profile", args=(PostsPagesTests.author.username,),
+            ), "posts/profile.html"),
+            (reverse(
+                "posts:post_details", args=(PostsPagesTests.post.id,),
+            ), "posts/post_detail.html"),
+            (reverse(
+                "posts:post_edit", args=(PostsPagesTests.post.id,),
+            ), "posts/post_create.html"),
+            (reverse(
+                "posts:group_list", args=(PostsPagesTests.group.slug,),
+            ), "posts/group_list.html"),
+            (reverse("posts:follow_index"), "posts/follow.html"),
+        ):
             with self.subTest(template=template):
                 self.assertTemplateUsed(
-                    self.authorized_client_author.get(reverse_name),
+                    self.authorized_client_author.get(url),
                     template
                 )
 
@@ -121,17 +117,11 @@ class PostsPagesTests(TestCase):
         """Проверяем, что на первой странице количество отображаемых объектов
         равно POST_PER_PAGE
         """
-        for url in [
+        for url in (
             reverse("posts:index"),
-            reverse(
-                "posts:profile",
-                kwargs={"username": PostsPagesTests.author}
-            ),
-            reverse(
-                "posts:group_list",
-                kwargs={"slug": PostsPagesTests.group.slug}
-            ),
-        ]:
+            reverse("posts:profile", args=(PostsPagesTests.author,)),
+            reverse("posts:group_list", args=(PostsPagesTests.group.slug,)),
+        ):
             with self.subTest(url=url):
                 self.assertEqual(
                     len(self.authorized_client.get(url).context["page_obj"]),
@@ -142,17 +132,11 @@ class PostsPagesTests(TestCase):
         """Проверяем, что на второй странице количество отображаемых объектов
         равно TEST_POST_COUNT - POST_PER_PAGE
         """
-        for url in [
+        for url in (
             reverse("posts:index"),
-            reverse(
-                "posts:profile",
-                kwargs={"username": PostsPagesTests.author}
-            ),
-            reverse(
-                "posts:group_list",
-                kwargs={"slug": PostsPagesTests.group.slug}
-            ),
-        ]:
+            reverse("posts:profile", args=(PostsPagesTests.author,)),
+            reverse("posts:group_list", args=(PostsPagesTests.group.slug,)),
+        ):
             with self.subTest(url=url):
                 self.assertEqual(
                     len(self.guest_client.get(
@@ -167,14 +151,8 @@ class PostsPagesTests(TestCase):
         """
         for url in (
             reverse("posts:index"),
-            reverse(
-                "posts:profile",
-                kwargs={"username": PostsPagesTests.author}
-            ),
-            reverse(
-                "posts:group_list",
-                kwargs={"slug": PostsPagesTests.group.slug}
-            ),
+            reverse("posts:profile", args=(PostsPagesTests.author,)),
+            reverse("posts:group_list", args=(PostsPagesTests.group.slug,)),
         ):
             obj = self.guest_client.get(url).context["page_obj"][0]
             for field, value in (
