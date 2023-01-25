@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="ru">
+<html class="h-100" lang="ru">
   <head>    
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -32,12 +32,18 @@
       {% endblock %}
     </title>
   </head>
-  <body>
-    {% include "includes/header.html" %}
-    <main>
-      {% block content %}
-        Где мой контент, Лебовски?
-      {% endblock %}
+  <body class="d-flex flex-column h-100">
+    <main class="">
+      {% include "includes/header.html" %}
+      <div class="row justify-content-center">
+        <div class="col-md-8 p-5">
+          <div class="card">
+            {% block content %}
+              Где мой контент, Лебовски?
+            {% endblock %}
+          </div>
+        </div>
+      </div>
     </main>
     {% include "includes/footer.html" %}
     <script src={% static "js/bootstrap.bundle.min.js" %}></script>

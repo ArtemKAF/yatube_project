@@ -3,12 +3,16 @@
   Последние обновления избранных авторов
 {% endblock %}
 {% block content %}
-  <div class="container py-5">
-    {% include 'includes/switcher.html' with follow=True %}
-    <h1>Последние обновления избранных авторов</h1>
+<div class="card-header">
+  <h3>Последние обновления избранных авторов</h3>
+</div>
+{% include 'includes/switcher.html' with follow=True %}
+<div class="card-body">
+  <div class="container">
     {% for post in page_obj %}
     {% include "includes/post.html" %}
     {% endfor %}
     {% include "includes/paginator.html" %}
   </div>
+</div>
 {% endblock %}

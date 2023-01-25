@@ -3,12 +3,16 @@
   Последние обновления на сайте
 {% endblock %}
 {% block content %}
-  <div class="container py-5">
-    {% include 'includes/switcher.html' with index=True %}
-    <h1>Последние обновления на сайте</h1>
+<div class="card-header">
+  <h3>Последние обновления на сайте</h3>
+</div>
+{% include 'includes/switcher.html' with index=True %}
+<div class="card-body">
+  <div class="container">
     {% for post in page_obj %}
     {% include "includes/post.html" %}
     {% endfor %}
     {% include "includes/paginator.html" %}
   </div>
+</div>
 {% endblock %}

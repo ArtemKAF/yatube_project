@@ -1,7 +1,6 @@
 import shutil
 import tempfile
 
-from django import forms
 from django.conf import settings
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -9,6 +8,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from ..constants import POST_PER_PAGE
+from ..forms import PostForm
 from ..models import Follow, Group, Post, User
 from ..utils import get_author_name
 from .constants import TEST_POST_COUNT
@@ -35,6 +35,14 @@ class PostsPagesTests(TestCase):
             author=PostsPagesTests.author
         )
 
+        picture = (
+            b"\x47\x49\x46\x38\x39\x61\x01\x00"
+            b"\x01\x00\x00\x00\x00\x21\xf9\x04"
+            b"\x01\x0a\x00\x01\x00\x2c\x00\x00"
+            b"\x00\x00\x01\x00\x01\x00\x00\x02"
+            b"\x02\x4c\x01\x00\x3b"
+        )
+
         cls.list_posts = []
 
         for i in range(TEST_POST_COUNT - 1):
@@ -45,13 +53,7 @@ class PostsPagesTests(TestCase):
                     group=PostsPagesTests.group,
                     image=SimpleUploadedFile(
                         name=f"small_{i}.gif",
-                        content=(
-                            b"\x47\x49\x46\x38\x39\x61\x01\x00"
-                            b"\x01\x00\x00\x00\x00\x21\xf9\x04"
-                            b"\x01\x0a\x00\x01\x00\x2c\x00\x00"
-                            b"\x00\x00\x01\x00\x01\x00\x00\x02"
-                            b"\x02\x4c\x01\x00\x3b"
-                        ),
+                        content=picture,
                         content_type="image/gif"
                     ),
                 )
@@ -64,13 +66,7 @@ class PostsPagesTests(TestCase):
             group=PostsPagesTests.group,
             image=SimpleUploadedFile(
                 name="small.gif",
-                content=(
-                    b"\x47\x49\x46\x38\x39\x61\x01\x00"
-                    b"\x01\x00\x00\x00\x00\x21\xf9\x04"
-                    b"\x01\x0a\x00\x01\x00\x2c\x00\x00"
-                    b"\x00\x00\x01\x00\x01\x00\x00\x02"
-                    b"\x02\x4c\x01\x00\x3b"
-                ),
+                content=picture,
                 content_type="image/gif"
             ),
         )
@@ -196,25 +192,26 @@ class PostsPagesTests(TestCase):
                 )
 
     def test_create_and_edit_post_page_correct_context(self):
-        """"Проверяем корректность контекста для страниц создания и
-        редактирования поста
+        """Проверяем корректность контекста страницы создания/редактирования
+        поста
         """
-        for url in (
-            reverse("posts:post_create"),
-            reverse("posts:post_edit", args=(PostsPagesTests.post.id,)),
-        ):
-            for value, expected in (
-                ("text", forms.fields.CharField),
-                ("group", forms.fields.ChoiceField),
-                ("image", forms.fields.ImageField),
-            ):
-                with self.subTest(value=value):
-                    self.assertIsInstance(
-                        self.authorized_client_author.get(url).context[
-                            "form"
-                        ].fields[value],
-                        expected
-                    )
+        urls = (
+            ("posts:post_create", None, False),
+            ("posts:post_edit", (PostsPagesTests.post.id,), True),
+        )
+        for name, args, is_edit_value in urls:
+            with self.subTest(name=name):
+                response = self.authorized_client_author.get(
+                    reverse(name, args=args)
+                )
+
+                self.assertIn("form", response.context)
+                self.assertIsInstance(response.context["form"], PostForm)
+
+                self.assertIn("is_edit", response.context)
+                is_edit = response.context["is_edit"]
+                self.assertIsInstance(is_edit, bool)
+                self.assertEqual(is_edit, is_edit_value)
 
     def test_edit_post_page_correct_form_in_context(self):
         """Проверяем корректность содержимого формы при редактировании поста"""

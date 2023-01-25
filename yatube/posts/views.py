@@ -30,6 +30,7 @@ def post_create(request):
         return redirect("posts:profile", request.user)
     context = {
         "form": form,
+        "is_edit": False,
         "title": "Добавить запись",
     }
     return render(request, "posts/post_create.html", context)

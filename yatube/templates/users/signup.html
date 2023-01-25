@@ -1,29 +1,25 @@
 {% extends "base.html" %}
 {% block title %}Зарегистрироваться{% endblock %}
 {% block content %}
-  <div class="row justify-content-center">
-    <div class="col-md-8 p-5">
-      <div class="card">
-        <div class="card-header">
+<div class="card-header">
+  <h3>Зарегистрироваться</h3>
+</div>
+<div class="card-body">
+  <div class="container">
+    {% include "includes/form_errors.html" %}
+    <form method="post" enctype="multipart/form-data"
+    {% if action_url %}
+      action="{% url action_url %}"
+    {% endif %}
+    >
+    {% csrf_token %}
+    {% include "includes/form_fields.html" %}
+      <div class="d-flex col-md-12 justify-content-center">
+        <button type="submit" class="btn btn-primary">
           Зарегистрироваться
-        </div>
-        <div class="card-body">
-          {% include "includes/form_errors.html" %}
-          <form method="post" enctype="multipart/form-data"
-          {% if action_url %}
-            action="{% url action_url %}"
-          {% endif %}
-          >
-          {% csrf_token %}
-          {% include "includes/form_fields.html" %}
-            <div class="col-md-6 offset-md-4">
-              <button type="submit" class="btn btn-primary">
-                Зарегистрироваться
-              </button>
-            </div>
-          </form>
-        </div>
+        </button>
       </div>
-    </div>
+    </form>
   </div>
+</div>
 {% endblock %}
