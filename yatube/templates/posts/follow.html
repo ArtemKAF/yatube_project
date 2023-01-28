@@ -7,6 +7,8 @@
   <h3>Последние обновления избранных авторов</h3>
 </div>
 {% include 'includes/switcher.html' with follow=True %}
+{% load cache %}
+{% cache 20 page_follow page_obj.number %}
 <div class="card-body">
   <div class="container">
     {% for post in page_obj %}
@@ -15,4 +17,5 @@
     {% include "includes/paginator.html" %}
   </div>
 </div>
+{% endcache %}
 {% endblock %}

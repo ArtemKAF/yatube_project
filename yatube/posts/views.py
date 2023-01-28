@@ -1,14 +1,12 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.cache import cache_page
 
-from .constants import CACHE_INDEX, POST_PER_PAGE
+from .constants import POST_PER_PAGE
 from .forms import CommentForm, PostForm
 from .models import Follow, Group, Post, User
 from .utils import create_pagination, get_author_name
 
 
-@cache_page(CACHE_INDEX, key_prefix="page_index")
 def index(request):
     context = {
         "page_obj": create_pagination(
@@ -91,7 +89,15 @@ def profile(request, username):
 
 
 def post_detail(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
+    post = get_object_or_404(
+        Post.objects.select_related(
+            "author", "group"
+        )
+        .prefetch_related(
+            "comments__author"
+        ),
+        id=post_id
+    )
     context = {
         "post": post,
         "count_posts": post.author.posts.count(),
@@ -123,7 +129,7 @@ def follow_index(request):
             "page_obj": create_pagination(
                 Post.objects.filter(
                     author__following__user=request.user,
-                ),
+                ).select_related("author", "group"),
                 POST_PER_PAGE,
                 request.GET.get("page")
             ),
