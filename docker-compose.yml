@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  yatube_app:
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./yatube_app:/usr/src/yatube_project
+    command: >
+      sh -c "python manage.py runserver 0.0.0.0:8000"
