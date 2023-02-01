@@ -208,10 +208,10 @@ class PostsPagesTests(TestCase):
         поста
         """
         urls = (
-            ("posts:post_create", None, False, "form"),
-            ("posts:post_edit", (PostsPagesTests.post.id,), True, "is_edit"),
+            ("posts:post_create", None, False),
+            ("posts:post_edit", (PostsPagesTests.post.id,), True),
         )
-        for name, args, is_edit_value, value in urls:
+        for name, args, is_edit_value in urls:
             with self.subTest(name=name):
                 response = self.authorized_client_author.get(
                     reverse(name, args=args)
@@ -224,7 +224,6 @@ class PostsPagesTests(TestCase):
                 is_edit = response.context["is_edit"]
                 self.assertIsInstance(is_edit, bool)
                 self.assertEqual(is_edit, is_edit_value)
-                print(response.context[value])
 
     def test_create_and_edit_post_page_correct_context(self):
         """"Проверяем корректность контекста для страниц создания и
