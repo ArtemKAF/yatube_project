@@ -78,10 +78,10 @@ class TestPost:
         text = 'Тестовый пост'
         author = user
 
-        assert Post.objects.all().count() == 0
+        assert Post.objects.count() == 0
 
         post = Post.objects.create(text=text, author=author)
-        assert Post.objects.all().count() == 1
+        assert Post.objects.count() == 1
         assert Post.objects.get(text=text, author=author).pk == post.pk
 
     def test_post_admin(self):
@@ -100,9 +100,11 @@ class TestPost:
         assert 'author' in admin_model.list_display, (
             'Добавьте `author` для отображения в списке модели административного сайта'
         )
+
         assert 'text' in admin_model.search_fields, (
             'Добавьте `text` для поиска модели административного сайта'
         )
+
         assert 'pub_date' in admin_model.list_filter, (
             'Добавьте `pub_date` для фильтрации модели административного сайта'
         )
@@ -144,19 +146,19 @@ class TestGroup:
         text = 'Тестовый пост'
         author = user
 
-        assert Post.objects.all().count() == 0
+        assert Post.objects.count() == 0
 
         post = Post.objects.create(text=text, author=author)
-        assert Post.objects.all().count() == 1
+        assert Post.objects.count() == 1
         assert Post.objects.get(text=text, author=author).pk == post.pk
 
         title = 'Тестовая группа'
         slug = 'test-link'
         description = 'Тестовое описание группы'
 
-        assert Group.objects.all().count() == 0
+        assert Group.objects.count() == 0
         group = Group.objects.create(title=title, slug=slug, description=description)
-        assert Group.objects.all().count() == 1
+        assert Group.objects.count() == 1
         assert Group.objects.get(slug=slug).pk == group.pk
 
         post.group = group

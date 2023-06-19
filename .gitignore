@@ -128,8 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# IDE
-.vscode
+# Папки, создаваемые средой разработки
 .idea
 .DS_Store
 .AppleDouble
@@ -145,3 +144,6 @@ dmypy.json
 .history/
 
 .mypy_cache
+
+# Media
+media/
