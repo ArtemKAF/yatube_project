@@ -1,4 +1,4 @@
-[![Actions status](https://github.com/ArtemKAF/yatube_project/actions/workflows/python-app.yml/badge.svg?branch=master)](https://github.com/ArtemKAF/yatube_project/actions/workflows/python-app.yml)
+[![Actions status](https://github.com/ArtemKAF/yatube_project/actions/workflows/python-app.yml/badge.svg?branch=main)](https://github.com/ArtemKAF/yatube_project/actions/workflows/python-app.yml)
 # yatube
 ### Описание
 Социальная сеть для публикации личных дневников
