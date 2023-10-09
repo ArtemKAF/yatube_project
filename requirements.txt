@@ -19,7 +19,7 @@ pytest==5.3.5             # via pytest-django
 pytz==2019.3              # via django
 requests==2.22.0
 six==1.14.0               # via packaging
-sorl-thumbnail==12.6.3
+sorl-thumbnail==12.10.0
 sqlparse==0.3.0           # via django, django-debug-toolbar
 urllib3==1.25.6           # via requests
 wcwidth==0.1.8            # via pytest

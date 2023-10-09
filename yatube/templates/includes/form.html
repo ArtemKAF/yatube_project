@@ -1,7 +1,7 @@
 {% load user_filters %}
 {% if form.errors %}
   {% for field in form %}
-    {% for error in field.errors %}            
+    {% for error in field.errors %}
       <div class="alert alert-danger">
         {{ error|escape }}
       </div>
@@ -21,7 +21,7 @@
 {% csrf_token %}
 {% for field in form %}
   <div class="form-group row my-3 p-3"
-    {% if field.field.required %} 
+    {% if field.field.required %}
       aria-required="true"
     {% else %}
       aria-required="false"

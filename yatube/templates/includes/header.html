@@ -30,7 +30,7 @@
         </a>
         <div class="collapse navbar-collapse" id="navbarContent">
           <ul class="navbar-nav nav-pills">
-            <li class="nav-item"> 
+            <li class="nav-item">
               <a
                 class="nav-link
                   {% if view_name  == 'about:author' %}
@@ -53,7 +53,7 @@
               </a>
             </li>
             {% if request.user.is_authenticated %}
-            <li class="nav-item"> 
+            <li class="nav-item">
               <a
                 class="nav-link
                 {% if view_name  == 'posts:post_create' %}
@@ -64,7 +64,7 @@
                 Новая запись
               </a>
             </li>
-            <li class="nav-item"> 
+            <li class="nav-item">
               <a
                 class="nav-link link-light"
                 href={% url "password_change" %}
@@ -92,7 +92,7 @@
             </a>
             </li>
             {% else %}
-            <li class="nav-item"> 
+            <li class="nav-item">
               <a
                 class="nav-link link-light
                   {% if view_name  == 'users:login' %}
@@ -103,7 +103,7 @@
                   Войти
                 </a>
             </li>
-            <li class="nav-item"> 
+            <li class="nav-item">
               <a
                 class="nav-link link-light
                 {% if view_name  == 'users:signup' %}
@@ -118,6 +118,6 @@
           </ul>
         </div>
       </div>
-    </nav>      
+    </nav>
   </header>
 {% endwith %}

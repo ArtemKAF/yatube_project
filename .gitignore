@@ -147,3 +147,7 @@ dmypy.json
 
 # Media
 media/
+
+# Project config and formating tools
+.pre-commit*
+pyproject.toml
