@@ -29,6 +29,8 @@ jobs:
     - name: Git Clone Action
       uses: actions/checkout@v3
       with:
+        repository: ${{ secrets.repository }}
+        ssh-key: ${{ secrets.ACCESS_TOKEN }}
         path: yatube/
     - name: Lint with flake8 author
       run: |

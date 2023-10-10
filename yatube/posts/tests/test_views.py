@@ -1,7 +1,6 @@
 import shutil
 import tempfile
 
-from django import forms
 from django.conf import settings
 from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -36,25 +35,41 @@ class PostsPagesTests(TestCase):
             author=PostsPagesTests.author
         )
 
-        cls.uploaded = SimpleUploadedFile(
-            name='small.gif',
-            content=(
-                b'\x47\x49\x46\x38\x39\x61\x01\x00'
-                b'\x01\x00\x00\x00\x00\x21\xf9\x04'
-                b'\x01\x0a\x00\x01\x00\x2c\x00\x00'
-                b'\x00\x00\x01\x00\x01\x00\x00\x02'
-                b'\x02\x4c\x01\x00\x3b'
-            ),
-            content_type='image/gif'
+        picture = (
+            b"\x47\x49\x46\x38\x39\x61\x01\x00"
+            b"\x01\x00\x00\x00\x00\x21\xf9\x04"
+            b"\x01\x0a\x00\x01\x00\x2c\x00\x00"
+            b"\x00\x00\x01\x00\x01\x00\x00\x02"
+            b"\x02\x4c\x01\x00\x3b"
         )
 
-        for i in range(TEST_POST_COUNT):
-            cls.post = Post.objects.create(
-                text=f"Текст тестового поста №: {i} для проверки",
-                author=PostsPagesTests.author,
-                group=PostsPagesTests.group,
-                image=PostsPagesTests.uploaded,
+        cls.list_posts = []
+
+        for i in range(TEST_POST_COUNT - 1):
+            cls.list_posts.append(
+                Post(
+                    text=f"Текст тестового поста №: {i} для проверки",
+                    author=PostsPagesTests.author,
+                    group=PostsPagesTests.group,
+                    image=SimpleUploadedFile(
+                        name=f"small_{i}.gif",
+                        content=picture,
+                        content_type="image/gif"
+                    ),
+                )
             )
+        Post.objects.bulk_create(cls.list_posts)
+
+        cls.post = Post.objects.create(
+            text="Текст тестового поста для проверки",
+            author=PostsPagesTests.author,
+            group=PostsPagesTests.group,
+            image=SimpleUploadedFile(
+                name="small.gif",
+                content=picture,
+                content_type="image/gif"
+            ),
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -71,30 +86,26 @@ class PostsPagesTests(TestCase):
 
     def test_pages_correct_templates(self):
         """Проверяем работу namespace:name"""
-        for reverse_name, template in {
-            reverse("posts:index"): "posts/index.html",
-            reverse("posts:post_create"): "posts/post_create.html",
-            reverse(
-                "posts:profile",
-                kwargs={"username": PostsPagesTests.author},
-            ): "posts/profile.html",
-            reverse(
-                "posts:post_details",
-                kwargs={"post_id": PostsPagesTests.post.id},
-            ): "posts/post_detail.html",
-            reverse(
-                "posts:post_edit",
-                kwargs={"post_id": PostsPagesTests.post.id},
-            ): "posts/post_create.html",
-            reverse(
-                "posts:group_list",
-                kwargs={"slug": PostsPagesTests.group.slug},
-            ): "posts/group_list.html",
-            reverse("posts:follow_index"): "posts/follow.html",
-        }.items():
+        for url, template in (
+            (reverse("posts:index"), "posts/index.html"),
+            (reverse("posts:post_create"), "posts/post_create.html"),
+            (reverse(
+                "posts:profile", args=(PostsPagesTests.author.username,),
+            ), "posts/profile.html"),
+            (reverse(
+                "posts:post_details", args=(PostsPagesTests.post.id,),
+            ), "posts/post_detail.html"),
+            (reverse(
+                "posts:post_edit", args=(PostsPagesTests.post.id,),
+            ), "posts/post_create.html"),
+            (reverse(
+                "posts:group_list", args=(PostsPagesTests.group.slug,),
+            ), "posts/group_list.html"),
+            (reverse("posts:follow_index"), "posts/follow.html"),
+        ):
             with self.subTest(template=template):
                 self.assertTemplateUsed(
-                    self.authorized_client_author.get(reverse_name),
+                    self.authorized_client_author.get(url),
                     template
                 )
 
@@ -102,17 +113,11 @@ class PostsPagesTests(TestCase):
         """Проверяем, что на первой странице количество отображаемых объектов
         равно POST_PER_PAGE
         """
-        for url in [
+        for url in (
             reverse("posts:index"),
-            reverse(
-                "posts:profile",
-                kwargs={"username": PostsPagesTests.author}
-            ),
-            reverse(
-                "posts:group_list",
-                kwargs={"slug": PostsPagesTests.group.slug}
-            ),
-        ]:
+            reverse("posts:profile", args=(PostsPagesTests.author,)),
+            reverse("posts:group_list", args=(PostsPagesTests.group.slug,)),
+        ):
             with self.subTest(url=url):
                 self.assertEqual(
                     len(self.authorized_client.get(url).context["page_obj"]),
@@ -123,17 +128,11 @@ class PostsPagesTests(TestCase):
         """Проверяем, что на второй странице количество отображаемых объектов
         равно TEST_POST_COUNT - POST_PER_PAGE
         """
-        for url in [
+        for url in (
             reverse("posts:index"),
-            reverse(
-                "posts:profile",
-                kwargs={"username": PostsPagesTests.author}
-            ),
-            reverse(
-                "posts:group_list",
-                kwargs={"slug": PostsPagesTests.group.slug}
-            ),
-        ]:
+            reverse("posts:profile", args=(PostsPagesTests.author,)),
+            reverse("posts:group_list", args=(PostsPagesTests.group.slug,)),
+        ):
             with self.subTest(url=url):
                 self.assertEqual(
                     len(self.guest_client.get(
@@ -146,25 +145,18 @@ class PostsPagesTests(TestCase):
         """Проверяем корректность полей объектов в post_obj для страниц
         с пагинацией
         """
-        for url in [
+        for url in (
             reverse("posts:index"),
-            reverse(
-                "posts:profile",
-                kwargs={"username": PostsPagesTests.author}
-            ),
-            reverse(
-                "posts:group_list",
-                kwargs={"slug": PostsPagesTests.group.slug}
-            ),
-        ]:
+            reverse("posts:profile", args=(PostsPagesTests.author,)),
+            reverse("posts:group_list", args=(PostsPagesTests.group.slug,)),
+        ):
             obj = self.guest_client.get(url).context["page_obj"][0]
-            for field, value in {
-                obj.text: f"Текст тестового поста №: {TEST_POST_COUNT - 1} "
-                          "для проверки",
-                obj.author: PostsPagesTests.author,
-                obj.group: PostsPagesTests.group,
-                obj.image: PostsPagesTests.post.image,
-            }.items():
+            for field, value in (
+                (obj.text, "Текст тестового поста для проверки"),
+                (obj.author, PostsPagesTests.author),
+                (obj.group, PostsPagesTests.group),
+                (obj.image, PostsPagesTests.post.image),
+            ):
                 with self.subTest(field=field):
                     self.assertEqual(field, value)
 
@@ -173,8 +165,7 @@ class PostsPagesTests(TestCase):
         self.assertEqual(
             self.guest_client.get(
                 reverse(
-                    "posts:group_list",
-                    kwargs={"slug": PostsPagesTests.group.slug}
+                    "posts:group_list", args=(PostsPagesTests.group.slug,)
                 )
             ).context["group"],
             PostsPagesTests.group
@@ -182,29 +173,26 @@ class PostsPagesTests(TestCase):
 
     def test_profile_page_correct_context(self):
         """"Проверяем корректность контекста для страницы профиля автора"""
-        for value, obj in {
-            "author": PostsPagesTests.author,
-            "author_full_name": get_author_name(PostsPagesTests.author),
-            "count_posts": PostsPagesTests.author.posts.count(),
-            "following": PostsPagesTests.user.follower.filter(
-                author=PostsPagesTests.author).exists(),
-        }.items():
+        for value, obj in (
+            ("author", PostsPagesTests.author),
+            ("author_full_name", get_author_name(PostsPagesTests.author)),
+            ("count_posts", PostsPagesTests.author.posts.count()),
+            ("following", PostsPagesTests.user.follower.filter(
+                author=PostsPagesTests.author).exists()),
+        ):
             with self.subTest(value=value):
                 self.assertEqual(
                     self.authorized_client.get(
                         reverse(
                             "posts:profile",
-                            kwargs={
-                                "username":
-                                PostsPagesTests.author.username
-                            }
+                            args=(PostsPagesTests.author.username,)
                         )
                     ).context[value],
                     obj
                 )
 
-    def test_correct_context_create_edit(self):
-        """Проверка корректности контекста страниц создания и редактирования
+    def test_create_and_edit_post_page_correct_context(self):
+        """Проверяем корректность контекста страницы создания/редактирования
         поста
         """
         urls = (
@@ -225,36 +213,13 @@ class PostsPagesTests(TestCase):
                 self.assertIsInstance(is_edit, bool)
                 self.assertEqual(is_edit, is_edit_value)
 
-    def test_create_and_edit_post_page_correct_context(self):
-        """"Проверяем корректность контекста для страниц создания и
-        редактирования поста
-        """
-        for url in (
-            reverse("posts:post_create"),
-            reverse("posts:post_edit", kwargs={
-                "post_id": PostsPagesTests.post.id
-            }),
-        ):
-            for value, expected in {
-                "text": forms.fields.CharField,
-                "group": forms.fields.ChoiceField,
-                "image": forms.fields.ImageField,
-            }.items():
-                with self.subTest(value=value):
-                    self.assertIsInstance(
-                        self.authorized_client_author.get(url).context[
-                            "form"
-                        ].fields[value],
-                        expected
-                    )
-
     def test_edit_post_page_correct_form_in_context(self):
         """Проверяем корректность содержимого формы при редактировании поста"""
         self.assertEqual(
             self.authorized_client_author.get(
                 reverse(
                     "posts:post_edit",
-                    kwargs={"post_id": PostsPagesTests.post.id}
+                    args=(PostsPagesTests.post.id,)
                 )
             ).context["form"].instance,
             PostsPagesTests.post
@@ -271,18 +236,13 @@ class PostsPagesTests(TestCase):
             text="Текст нового поста",
             author=PostsPagesTests.author,
             group=new_group,
-            image=PostsPagesTests.uploaded,
         )
         for url in (
             reverse("posts:index"),
             reverse(
-                "posts:profile",
-                kwargs={"username": PostsPagesTests.author.username}
+                "posts:profile", args=(PostsPagesTests.author.username,)
             ),
-            reverse(
-                "posts:group_list",
-                kwargs={"slug": new_group.slug}
-            ),
+            reverse("posts:group_list", args=(new_group.slug,)),
         ):
             with self.subTest(url=url):
                 self.assertEqual(
@@ -290,18 +250,14 @@ class PostsPagesTests(TestCase):
                     new_post
                 )
         self.assertEqual(
-            self.guest_client.get(reverse(
-                "posts:post_details",
-                kwargs={"post_id": new_post.id}
-            )).context["post"],
+            self.guest_client.get(
+                reverse("posts:post_details", args=(new_post.id,))
+            ).context["post"],
             new_post
         )
         self.assertIsNot(
             self.guest_client.get(
-                reverse(
-                    "posts:group_list",
-                    kwargs={"slug": PostsPagesTests.group.slug}
-                )
+                reverse("posts:group_list", args=(PostsPagesTests.group.slug,))
             ).context["page_obj"][0],
             new_post
         )
@@ -312,19 +268,15 @@ class PostsPagesTests(TestCase):
         """
         response = self.authorized_client.post(
             reverse(
-                "posts:add_comment",
-                kwargs={"post_id": PostsPagesTests.post.id},
+                "posts:add_comment", args=(PostsPagesTests.post.id,)
             ),
-            data={
-                "text": "Коментарий к тестовому посту",
-            },
+            data={"text": "Коментарий к тестовому посту"},
             follow=True,
         )
         self.assertEqual(
             self.authorized_client.get(
                 reverse(
-                    "posts:post_details",
-                    kwargs={"post_id": PostsPagesTests.post.id},
+                    "posts:post_details", args=(PostsPagesTests.post.id,),
                 )
             ).context["comments"][0].text,
             response.context["comments"][0].text
@@ -336,8 +288,7 @@ class PostsPagesTests(TestCase):
         """
         response = self.authorized_client.get(
             reverse(
-                "posts:post_details",
-                kwargs={"post_id": PostsPagesTests.post.id},
+                "posts:post_details", args=(PostsPagesTests.post.id,)
             )
         )
         self.assertEqual(
@@ -346,6 +297,7 @@ class PostsPagesTests(TestCase):
         )
 
     def test_cache_index(self):
+        """Проверяем работу кэша на странице index"""
         post_for_deleting = Post.objects.create(
             text="Пост для проверки cache",
             author=PostsPagesTests.author,
@@ -389,10 +341,7 @@ class FollowTests(TestCase):
         """Проверяем возможность подписаться на автора"""
         self.new_authorized_client.get(
             reverse(
-                "posts:profile_follow",
-                kwargs={
-                    "username": FollowTests.author.username,
-                }
+                "posts:profile_follow", args=(FollowTests.author.username,)
             )
         )
         self.assertEqual(Follow.objects.count(), self.count_follow + 1)
@@ -401,8 +350,7 @@ class FollowTests(TestCase):
         """Проверяем возможность отписаться от автора"""
         self.authorized_client.get(
             reverse(
-                "posts:profile_unfollow",
-                kwargs={'username': FollowTests.author.username}
+                "posts:profile_unfollow", args=(FollowTests.author.username,)
             ))
         self.assertEqual(Follow.objects.all().count(), self.count_follow - 1)
 

@@ -1,14 +1,12 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.cache import cache_page
 
-from .constants import CACHE_INDEX, POST_PER_PAGE
+from .constants import POST_PER_PAGE
 from .forms import CommentForm, PostForm
 from .models import Follow, Group, Post, User
 from .utils import create_pagination, get_author_name
 
 
-@cache_page(CACHE_INDEX, key_prefix="page_index")
 def index(request):
     context = {
         "page_obj": create_pagination(
@@ -30,8 +28,8 @@ def post_create(request):
         return redirect("posts:profile", request.user)
     context = {
         "form": form,
-        "title": "Добавить запись",
         "is_edit": False,
+        "title": "Добавить запись",
     }
     return render(request, "posts/post_create.html", context)
 
@@ -73,9 +71,9 @@ def group_posts(request, slug):
 def profile(request, username):
     author = get_object_or_404(User, username=username)
     following = False
-    if request.user.is_authenticated:
-        if request.user.follower.filter(author=author).exists():
-            following = True
+    if (request.user.is_authenticated
+            and request.user.follower.filter(author=author).exists()):
+        following = True
     context = {
         "page_obj": create_pagination(
             author.posts.select_related("group"),
@@ -91,7 +89,15 @@ def profile(request, username):
 
 
 def post_detail(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
+    post = get_object_or_404(
+        Post.objects.select_related(
+            "author", "group"
+        )
+        .prefetch_related(
+            "comments__author"
+        ),
+        id=post_id
+    )
     context = {
         "post": post,
         "count_posts": post.author.posts.count(),
@@ -123,7 +129,7 @@ def follow_index(request):
             "page_obj": create_pagination(
                 Post.objects.filter(
                     author__following__user=request.user,
-                ),
+                ).select_related("author", "group"),
                 POST_PER_PAGE,
                 request.GET.get("page")
             ),
@@ -147,6 +153,6 @@ def profile_unfollow(request, username):
     user = request.user
     is_follower = user.follower.filter(author=author).exists()
     if user != author and is_follower:
-        temp = Follow.objects.filter(user=user, author=author)
-        temp.delete()
+        following_object = Follow.objects.filter(user=user, author=author)
+        following_object.delete()
     return redirect("posts:profile", username)

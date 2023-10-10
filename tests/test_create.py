@@ -1,5 +1,10 @@
+from io import BytesIO
+
 import pytest
 from django import forms
+from django.core.files.base import File
+from PIL import Image
+
 from posts.models import Post
 
 
@@ -15,7 +20,10 @@ class TestCreateView:
             response = user_client.get('/create/')
         assert response.status_code != 404, 'Страница `/create/` не найдена, проверьте этот адрес в *urls.py*'
         assert 'form' in response.context, 'Проверьте, что передали форму `form` в контекст страницы `/create/`'
-        assert len(response.context['form'].fields) == 3, 'Проверьте, что в форме `form` на страницу `/create/` 3 поля'
+        fields_cnt = 3
+        assert len(response.context['form'].fields) == fields_cnt, (
+            f'Проверьте, что в форме `form` на страницу `/create/` {fields_cnt} поля'
+        )
         assert 'group' in response.context['form'].fields, (
             'Проверьте, что в форме `form` на странице `/create/` есть поле `group`'
         )
@@ -36,8 +44,23 @@ class TestCreateView:
             'Проверьте, что в форме `form` на странице `/create/` поле `text` обязательно'
         )
 
+        assert 'image' in response.context['form'].fields, (
+            'Проверьте, что в форме `form` на странице `/create/` есть поле `image`'
+        )
+        assert type(response.context['form'].fields['image']) == forms.fields.ImageField, (
+            'Проверьте, что в форме `form` на странице `/create/` поле `image` типа `ImageField`'
+        )
+
+    @staticmethod
+    def get_image_file(name, ext='png', size=(50, 50), color=(256, 0, 0)):
+        file_obj = BytesIO()
+        image = Image.new("RGBA", size=size, color=color)
+        image.save(file_obj, ext)
+        file_obj.seek(0)
+        return File(file_obj, name=name)
+
     @pytest.mark.django_db(transaction=True)
-    def test_create_view_post(self, user_client, user, group):
+    def test_create_view_post(self, mock_media, user_client, user, group):
         text = 'Проверка нового поста!'
         try:
             response = user_client.get('/create')
@@ -45,7 +68,8 @@ class TestCreateView:
             assert False, f'''Страница `/create` работает неправильно. Ошибка: `{e}`'''
         url = '/create/' if response.status_code in (301, 302) else '/create'
 
-        response = user_client.post(url, data={'text': text, 'group': group.id})
+        image = self.get_image_file('image.png')
+        response = user_client.post(url, data={'text': text, 'group': group.id, 'image': image})
 
         assert response.status_code in (301, 302), (
             'Проверьте, что со страницы `/create/` после создания поста, '
@@ -58,7 +82,8 @@ class TestCreateView:
         )
 
         text = 'Проверка нового поста 2!'
-        response = user_client.post(url, data={'text': text})
+        image = self.get_image_file('image2.png')
+        response = user_client.post(url, data={'text': text, 'image': image})
         assert response.status_code in (301, 302), (
             'Проверьте, что со страницы `/create/` после создания поста, '
             f'перенаправляете на страницу профиля автора `/profile/{user.username}`'

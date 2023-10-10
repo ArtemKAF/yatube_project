@@ -1,24 +1,4 @@
 {% load user_filters %}
-{% if form.errors %}
-  {% for field in form %}
-    {% for error in field.errors %}
-      <div class="alert alert-danger">
-        {{ error|escape }}
-      </div>
-    {% endfor %}
-  {% endfor %}
-  {% for error in form.non_field_errors %}
-    <div class="alert alert-danger">
-      {{ error|escape }}
-    </div>
-  {% endfor %}
-{% endif %}
-<form method="post" enctype="multipart/form-data"
-  {% if action_url %}
-    action="{% url action_url %}"
-  {% endif %}
->
-{% csrf_token %}
 {% for field in form %}
   <div class="form-group row my-3 p-3"
     {% if field.field.required %}

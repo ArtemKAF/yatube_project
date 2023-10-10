@@ -145,7 +145,10 @@ dmypy.json
 
 .mypy_cache
 
-# Media
+# папки со статикой и медиа
+static/
+yatube/posts/static/
+yatube/media/
 media/
 
 # Project config and formating tools

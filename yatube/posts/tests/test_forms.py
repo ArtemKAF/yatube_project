@@ -2,6 +2,7 @@ import shutil
 import tempfile
 from http import HTTPStatus
 
+from django import forms
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
@@ -89,6 +90,27 @@ class PostsCreateFormTests(TestCase):
                             field
                         ].__dict__[value],
                         attr
+                    )
+
+    def test_types_form_fields(self):
+        """"Проверяем корректность типов полей формы"""
+        for url in (
+            reverse("posts:post_create"),
+            reverse("posts:post_edit", args=(PostsCreateFormTests.post.id,)),
+        ):
+            for value, expected in (
+                ("text", forms.fields.CharField),
+                ("group", forms.fields.ChoiceField),
+                ("image", forms.fields.ImageField),
+            ):
+                with self.subTest(value=value):
+                    self.assertIsInstance(
+                        self.authorized_client_author.get(url).context[
+                            "form"
+                        ].fields[value],
+                        expected,
+                        f"\nПроверьте, что у формы на странице {url} поле "
+                        f"{value} имеет тип {expected.__name__}"
                     )
 
     def test_create_post_authrized_client(self):

@@ -2,7 +2,6 @@ import pytest
 from django.core.cache import cache
 from django.core.paginator import Page, Paginator
 
-
 pytestmark = [pytest.mark.django_db]
 
 
